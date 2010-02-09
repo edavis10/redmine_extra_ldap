@@ -17,12 +17,24 @@ class LdapSyncsControllerTest < ActionController::TestCase
       @admin.admin = true
       @admin.save!
       @request.session[:user_id] = @admin
+    end
+
+    context "" do
+      setup do
+        get :show
+      end
       
+      should_respond_with :redirect
+      should_redirect_to("authentication source list") { {:controller => 'auth_sources', :action => 'list' }}
+      should_set_the_flash_to /complete/i
+    end
+
+    should "sync the LDAP and Redmine accounts" do
+      # Isolate from the LDAP server
+      ExtraLdap.expects(:add_new_users).returns(true)
+      ExtraLdap.expects(:lock_or_unlock_accounts).returns(true)
+
       get :show
     end
-    
-    should_respond_with :redirect
-    should_redirect_to("authentication source list") { {:controller => 'auth_sources', :action => 'list' }}
-    should_set_the_flash_to /complete/i
   end
 end
