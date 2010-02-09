@@ -67,4 +67,56 @@ class ExtraLdapTest < ActiveSupport::TestCase
     end
       
   end
+
+  context '#add_existing_users_to_default_group' do
+    context 'no group parameter' do
+      should 'raise an error' do
+        assert_raises ArgumentError do
+          ExtraLdap.add_existing_users_to_default_group(nil)
+        end
+      end
+    end
+
+    context 'with an invalid group id or name' do
+      should 'raise an error' do
+        assert_raises ArgumentError do
+          ExtraLdap.add_existing_users_to_default_group('not a real group')
+        end
+      end
+    end
+
+    context 'with a valid group' do
+      setup do
+        @group_parameter = Group.generate!(:lastname => 'new group')
+        @existing_group = Group.generate!(:lastname => 'existing group')
+        
+        @no_group_user1 = User.generate_with_protected!
+        @no_group_user2 = User.generate_with_protected!
+        @existing_group_user = User.generate_with_protected!
+        @existing_group_user.groups << @existing_group
+      end
+
+      should 'add users without a group to the group parameter' do
+        ExtraLdap.add_existing_users_to_default_group(@group_parameter.id)
+
+        assert @no_group_user1.groups.include?(@group_parameter), "User1 did not join the group"
+        assert @no_group_user2.groups.include?(@group_parameter), "User2 did not join the group"
+      end
+
+      should 'not add users who are already in a group' do
+        ExtraLdap.add_existing_users_to_default_group(@group_parameter.id)
+
+        assert !@existing_group_user.group_ids.include?(@group_parameter.id), "User on another group was incorrected added"
+      end
+
+      should 'also allow a group name' do
+        ExtraLdap.add_existing_users_to_default_group(@group_parameter.lastname)
+
+        assert @no_group_user1.groups.include?(@group_parameter), "User1 did not join the group"
+        assert @no_group_user2.groups.include?(@group_parameter), "User2 did not join the group"
+      end
+
+    end
+  end
+
 end
