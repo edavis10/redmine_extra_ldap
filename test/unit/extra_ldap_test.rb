@@ -48,9 +48,21 @@ class ExtraLdapTest < ActiveSupport::TestCase
       end
 
       context 'and a group parameter' do
-        should 'add each user to the specific Redmine group'
-        should 'allow using the id for the group'
-        should 'allow using the name for the group'
+        setup do
+          @group = Group.generate!
+        end
+
+        should 'add each user to the specific Redmine group using the group id' do
+          assert_difference('@group.users.count', 5) do
+            ExtraLdap.add_new_users(@group.id)
+          end
+        end
+        
+        should 'allow using the name for the group using the group name' do
+          assert_difference('@group.users.count', 5) do
+            ExtraLdap.add_new_users(@group.lastname)
+          end
+        end
       end
     end
       

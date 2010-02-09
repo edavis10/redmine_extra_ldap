@@ -17,6 +17,12 @@ module RedmineExtraLdap
           object_filter = Net::LDAP::Filter.eq( "objectClass", "*" ) 
           dn = String.new
           attrs = []
+
+          if group_id = options[:group]
+            group = Group.find_by_id(group_id)
+            group ||= Group.find_by_lastname(group_id)
+          end
+
           ldap_con.search( :base => self.base_dn, 
                            :filter => object_filter,
                            :attributes=> ['dn',
@@ -30,6 +36,10 @@ module RedmineExtraLdap
                      :auth_source_id => self.id ]
             new_user = User.create(*attrs) do |user|
               user.login = AuthSourceLdap.get_attr(entry, self.attr_login)
+            end
+
+            if new_user.valid? && group.present?
+              new_user.groups << group
             end
 
           end
