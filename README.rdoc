@@ -20,7 +20,11 @@ A copy of the plugin can be downloaded from {Little Stream Software}[https://pro
 
 == Usage
 
-__XXX__
+Run or schedule any of the following rake tasks:
+
+* rake extra_ldap:add_existing_users_to_default_group
+* rake extra_ldap:add_new_users
+* rake extra_ldap:lock_or_unlock_accounts
 
 == License
 
