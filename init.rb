@@ -15,3 +15,6 @@ Dispatcher.to_prepare :redmine_extra_ldap do
   require_dependency 'auth_source_ldap'
   AuthSourceLdap.send(:include, RedmineExtraLdap::Patches::AuthSourceLdapPatch)
 end
+
+require 'redmine_extra_ldap/hooks/auth_sources_hooks'
+
