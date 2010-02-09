@@ -9,6 +9,18 @@ class ExtraLdap
     end
   end
 
+  def self.lock_or_unlock_accounts
+    AuthSourceLdap.all.each do |ldap|
+      ldap.users.each do |user|
+        if ldap.user_exists?(user)
+          user.update_attributes(:status => User::STATUS_ACTIVE) unless user.active?
+        else
+          user.update_attributes(:status => User::STATUS_LOCKED) unless user.locked?
+        end
+      end
+    end
+  end
+
   # Add all of the existing users to a specific group unless they
   # already belong to a group.
   def self.add_existing_users_to_default_group(group_id)

@@ -68,6 +68,64 @@ class ExtraLdapTest < ActiveSupport::TestCase
       
   end
 
+  context '#lock_or_unlock_accounts' do
+    context 'without an active LDAP connection' do
+      should 'do nothing to the users' do
+        AuthSourceLdap.expects(:all).returns([])
+        
+        ExtraLdap.lock_or_unlock_accounts
+      end
+    end
+
+    context 'with active LDAP connections' do
+      setup do
+        # Two users
+        @auth1 = AuthSourceLdap.generate!(:name => 'localhost',
+                                          :host => '127.0.0.1',
+                                          :port => 389,
+                                          :base_dn => 'OU=Person,DC=redmine,DC=org',
+                                          :attr_login => 'uid',
+                                          :attr_firstname => 'givenName',
+                                          :attr_lastname => 'sn',
+                                          :attr_mail => 'mail')
+        # Four users, one duplicate
+        @auth2 = AuthSourceLdap.generate!(:name => 'localhost database 2',
+                                          :host => '127.0.0.1',
+                                          :port => 389,
+                                          :base_dn => 'OU=Person,DC=redmine2,DC=org',
+                                          :attr_login => 'uid',
+                                          :attr_firstname => 'givenName',
+                                          :attr_lastname => 'sn',
+                                          :attr_mail => 'mail')
+
+        # Add all of the users from LDAP
+        ExtraLdap.add_new_users
+      end
+        
+      context "with an active user" do
+        should "lock their account if they are not found in their AuthSource" do
+          @active_and_missing_user = User.generate_with_protected!(:auth_source => @auth1)
+          assert !@active_and_missing_user.locked?
+          
+          ExtraLdap.lock_or_unlock_accounts
+
+          assert @active_and_missing_user.reload.locked?
+        end
+      end
+      context "with a locked user" do
+        should "unlock their account if they are found in the AuthSource" do
+          User.destroy_all({:login => 'edavis'})
+          @locked_and_present_user = User.generate_with_protected!(:auth_source => @auth1, :login => 'edavis', :status => User::STATUS_LOCKED)
+          assert @locked_and_present_user.locked?
+          
+          ExtraLdap.lock_or_unlock_accounts
+
+          assert !@locked_and_present_user.reload.locked?
+        end
+      end
+    end
+  end
+
   context '#add_existing_users_to_default_group' do
     context 'no group parameter' do
       should 'raise an error' do

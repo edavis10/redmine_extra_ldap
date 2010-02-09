@@ -22,4 +22,13 @@ END_DESC
     group = ENV['group']
     ExtraLdap.add_existing_users_to_default_group(group)
   end
+
+  desc <<-END_DESC
+Lock (or unlock) users who are not found (or found) in the LDAP database.
+
+END_DESC
+
+  task :lock_or_unlock_accounts => :environment do
+    ExtraLdap.lock_or_unlock_accounts
+  end
 end
