@@ -60,6 +60,10 @@ module RedmineExtraLdap
           return dn.present?
 
         end
+
+        def find_user_by_email(mail)
+          false # TODO: implement
+        end
       end
     end
   end

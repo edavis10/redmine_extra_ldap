@@ -17,4 +17,5 @@ Dispatcher.to_prepare :redmine_extra_ldap do
 end
 
 require 'redmine_extra_ldap/hooks/auth_sources_hooks'
+require 'redmine_extra_ldap/hooks/mail_handler_hooks'
 
