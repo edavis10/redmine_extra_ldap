@@ -8,6 +8,7 @@ END_DESC
 
   task :add_new_users => :environment do
     group = ENV['group']
+    group ||= ENV['GROUP']
     ExtraLdap.add_new_users(group)
   end
 
@@ -20,6 +21,7 @@ END_DESC
 
   task :add_existing_users_to_default_group => :environment do
     group = ENV['group']
+    group ||= ENV['GROUP']
     ExtraLdap.add_existing_users_to_default_group(group)
   end
 
