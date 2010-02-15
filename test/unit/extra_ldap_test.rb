@@ -64,6 +64,25 @@ class ExtraLdapTest < ActiveSupport::TestCase
           end
         end
       end
+
+      context 'with groups associated to the LDAP Auth Source' do
+        setup do
+          @group = Group.generate!
+          @auth1.groups << @group
+        end
+
+        should "add the Auth Source's groups to the user" do
+          assert_difference('@group.users.count',2) do
+            ExtraLdap.add_new_users
+          end
+          
+          user = User.find_by_login('edavis')
+          assert user
+          assert user.groups.include?(@group), "User did not join the group"
+
+        end
+      end
+      
     end
       
   end

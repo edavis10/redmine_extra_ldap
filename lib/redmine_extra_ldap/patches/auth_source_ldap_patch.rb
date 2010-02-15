@@ -38,8 +38,9 @@ module RedmineExtraLdap
               user.login = AuthSourceLdap.get_attr(entry, self.attr_login)
             end
 
-            if new_user.valid? && group.present?
-              new_user.groups << group
+            if new_user.valid?
+              new_user.groups << group if group.present?
+              new_user.groups << self.groups if self.respond_to?(:groups) && self.groups
             end
 
           end
