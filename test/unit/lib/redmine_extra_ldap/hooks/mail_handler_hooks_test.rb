@@ -66,7 +66,7 @@ class RedmineExtraLdap::Hook::MailHandlerHooksTest < ActiveSupport::TestCase
 
       context "with a user that is not found in LDAP" do
         should 'return a nil user' do
-          assert_equal nil, @handler.send(:find_user, @standard_email_address)
+          assert_equal nil, @handler.send(:find_user, 'not-in-ldap@example.com')
         end
       end
       

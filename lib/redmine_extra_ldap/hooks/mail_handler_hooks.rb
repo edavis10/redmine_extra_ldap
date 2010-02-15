@@ -9,12 +9,12 @@ module RedmineExtraLdap
       # * sender_email
       # * email
       def model_mail_handler_find_user(context={})
-        return '' if context[:user].present?
-        return '' unless context[:sender_email].present?
-        
+        return false if context[:user].present?
+        return false unless context[:sender_email].present?
+
         AuthSourceLdap.all(:conditions => {:onthefly_register => true}).each do |ldap|
           if ldap_user = ldap.find_user_by_email(context[:sender_email])
-            context[:user] = User.create_from_ldap(ldap_user)
+            return User.create_from_ldap(ldap_user.first)
           end
         end
       end

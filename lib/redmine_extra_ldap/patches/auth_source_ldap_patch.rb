@@ -63,7 +63,34 @@ module RedmineExtraLdap
         end
 
         def find_user_by_email(mail)
-          false # TODO: implement
+          dn = String.new
+          attrs = []
+
+          ldap_con = initialize_ldap_con(self.account, self.account_password)
+          mail_filter = Net::LDAP::Filter.eq( self.attr_mail, mail ) 
+          object_filter = Net::LDAP::Filter.eq( "objectClass", "*" )
+
+          ldap_con.search( :base => base_dn,
+                           :filter => object_filter & mail_filter,
+                           :attributes => ['dn',
+                                           attr_login,
+                                           attr_firstname,
+                                           attr_lastname,
+                                           attr_mail]) do |entry|
+            attrs = [:login => AuthSourceLdap.get_attr(entry, self.attr_login),
+                     :firstname => AuthSourceLdap.get_attr(entry, self.attr_firstname),
+                     :lastname => AuthSourceLdap.get_attr(entry, self.attr_lastname),
+                     :mail => AuthSourceLdap.get_attr(entry, self.attr_mail),
+                     :auth_source_id => self.id ]
+            
+            dn = entry.dn
+          end
+
+          if dn.empty?
+            return false
+          else
+            return attrs
+          end
         end
       end
     end
