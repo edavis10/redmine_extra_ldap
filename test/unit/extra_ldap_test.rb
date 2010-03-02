@@ -85,7 +85,14 @@ class ExtraLdapTest < ActiveSupport::TestCase
 
         end
       end
-      
+
+      context 'with the "ALL" ldap connection name' do
+        should 'connect to all of the LDAP connections to add new users' do
+          assert_difference('User.count', 5) do
+            ExtraLdap.add_new_users('all')
+          end
+        end
+      end
     end
       
   end
@@ -136,6 +143,18 @@ class ExtraLdapTest < ActiveSupport::TestCase
           assert !@locked_and_present_user.reload.locked?
         end
       end
+
+      context 'with the "ALL" ldap connection name' do
+        should 'connect to all of the LDAP connections to add new users' do
+          @active_and_missing_user = User.generate_with_protected!(:auth_source => @auth1)
+          assert !@active_and_missing_user.locked?
+          
+          ExtraLdap.lock_or_unlock_accounts('all')
+
+          assert @active_and_missing_user.reload.locked?
+        end
+      end
+
     end
   end
 
@@ -214,6 +233,17 @@ class ExtraLdapTest < ActiveSupport::TestCase
         assert @no_group_user1.groups.include?(@group_parameter), "User1 did not join the group"
         assert @no_group_user2.groups.include?(@group_parameter), "User2 did not join the group"
       end
+
+      context 'with the "ALL" ldap connection name' do
+        should 'connect to all of the LDAP connections to assign groups' do
+          ExtraLdap.add_existing_users_to_default_group('all', @group_parameter.lastname)
+          
+          ExtraLdap.lock_or_unlock_accounts('all')
+          assert @no_group_user1.groups.include?(@group_parameter), "User1 did not join the group"
+          assert @no_group_user2.groups.include?(@group_parameter), "User2 did not join the group"
+        end
+      end
+
 
     end
   end

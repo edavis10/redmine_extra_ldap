@@ -7,7 +7,7 @@ namespace :extra_ldap do
 Query LDAP and add any missing users to Redmine.
 
 Required Options:
-  use=connection-name    name or id of a Redmine LDAP source to check
+  use=connection-name    name or id of a Redmine LDAP source to check. (Use ALL for all connections)
 
 Options:
   group=GROUP            name or id of a Redmine group to add the user to
@@ -23,7 +23,7 @@ END_DESC
 Add any existing users who are not in a group so a specific group.
 
 Required Options:
-  use=connection-name    name or id of a Redmine LDAP source to check
+  use=connection-name    name or id of a Redmine LDAP source to check. (Use ALL for all connections)
 
 Options:
   group=GROUP            name or id of a Redmine group to add the user to
@@ -39,7 +39,7 @@ END_DESC
 Lock (or unlock) users who are not found (or found) in the LDAP database.
 
 Required Options:
-  use=connection-name    name or id of a Redmine LDAP source to check
+  use=connection-name    name or id of a Redmine LDAP source to check. (Use ALL for all connections)
 
 END_DESC
 

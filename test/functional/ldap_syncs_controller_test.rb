@@ -30,30 +30,9 @@ class LdapSyncsControllerTest < ActionController::TestCase
     end
 
     should "sync the LDAP and Redmine accounts" do
-      # Two users
-      @auth1 = AuthSourceLdap.generate!(:name => 'localhost',
-                                        :host => '127.0.0.1',
-                                        :port => 389,
-                                        :base_dn => 'OU=Person,DC=redmine,DC=org',
-                                        :attr_login => 'uid',
-                                        :attr_firstname => 'givenName',
-                                        :attr_lastname => 'sn',
-                                        :attr_mail => 'mail')
-      # Four users, one duplicate
-      @auth2 = AuthSourceLdap.generate!(:name => 'localhost database 2',
-                                        :host => '127.0.0.1',
-                                        :port => 389,
-                                        :base_dn => 'OU=Person,DC=redmine2,DC=org',
-                                        :attr_login => 'uid',
-                                        :attr_firstname => 'givenName',
-                                        :attr_lastname => 'sn',
-                                        :attr_mail => 'mail')
-
       # Isolate from the LDAP server
-      ExtraLdap.expects(:add_new_users).with(@auth1.name).returns(true)
-      ExtraLdap.expects(:lock_or_unlock_accounts).with(@auth1.name).returns(true)
-      ExtraLdap.expects(:add_new_users).with(@auth2.name).returns(true)
-      ExtraLdap.expects(:lock_or_unlock_accounts).with(@auth2.name).returns(true)
+      ExtraLdap.expects(:add_new_users).with(:all).returns(true)
+      ExtraLdap.expects(:lock_or_unlock_accounts).with(:all).returns(true)
 
       get :show
     end
