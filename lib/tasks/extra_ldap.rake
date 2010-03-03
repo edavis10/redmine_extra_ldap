@@ -46,4 +46,16 @@ END_DESC
   task :lock_or_unlock_accounts => :environment do
     ExtraLdap.lock_or_unlock_accounts(extract_ldap_source)
   end
+
+  desc <<-END_DESC
+Update the custom data fields for LDAP users.
+
+Required Options:
+  use=connection-name    name or id of a Redmine LDAP source to check. (Use ALL for all connections)
+
+END_DESC
+
+  task :update_custom_user_data => :environment do
+    ExtraLdap.update_custom_user_data(extract_ldap_source)
+  end
 end

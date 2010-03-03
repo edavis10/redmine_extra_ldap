@@ -36,6 +36,22 @@ class ExtraLdap
     end
   end
 
+  def self.update_custom_user_data(using_ldap_connection)
+    ldaps = ldap_connection(using_ldap_connection)
+
+    ldaps.each do |ldap|
+      ldap.users.all.each do |user|
+        attributes = ldap.get_custom_attributes_for_user(user.login)
+        if attributes.present? &&
+            attributes.first.present? &&
+            attributes.first[:custom_field_values].present?
+          user.custom_field_values = attributes.first[:custom_field_values]
+          user.save
+        end
+      end
+    end
+  end
+  
   private
 
   def self.ldap_connection(name_or_id)

@@ -33,6 +33,7 @@ class LdapSyncsControllerTest < ActionController::TestCase
       # Isolate from the LDAP server
       ExtraLdap.expects(:add_new_users).with(:all).returns(true)
       ExtraLdap.expects(:lock_or_unlock_accounts).with(:all).returns(true)
+      ExtraLdap.expects(:update_custom_user_data).with(:all).returns(true)
 
       get :show
     end

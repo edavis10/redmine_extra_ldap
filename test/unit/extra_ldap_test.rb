@@ -248,4 +248,56 @@ class ExtraLdapTest < ActiveSupport::TestCase
     end
   end
 
+  context "#update_custom_user_data" do
+    context 'without an active LDAP connection' do
+      should 'raise an error' do
+        assert_raises ArgumentError do
+          ExtraLdap.update_custom_user_data('some ldap')
+        end
+      end
+    end
+
+    context 'with an active LDAP connection' do
+      setup do
+        @custom_field = UserCustomField.generate!(:name => 'Home directory')
+
+        # Two users
+        @auth1 = AuthSourceLdap.generate!(:name => 'localhost',
+                                          :host => '127.0.0.1',
+                                          :port => 389,
+                                          :base_dn => 'OU=Person,DC=redmine,DC=org',
+                                          :attr_login => 'uid',
+                                          :attr_firstname => 'givenName',
+                                          :attr_lastname => 'sn',
+                                          :attr_mail => 'mail')
+
+        # Add all of the users from LDAP
+        ExtraLdap.add_new_users(@auth1.name)
+        @user = User.find_by_login('example1')
+        assert @user
+        assert_equal @auth1, @user.auth_source
+      end
+      
+      context 'that has no custom_attributes' do
+        should 'do nothing to the user accounts' do
+          ExtraLdap.update_custom_user_data(@auth1.name)
+
+          assert_equal nil, @user.custom_value_for(@custom_field).value
+        end
+
+      end
+
+      context 'that has custom_attributes configured' do
+        should 'update the custom attribute values on the user' do
+          @auth1.custom_attributes = {@custom_field.id.to_s => 'homeDirectory'}
+          @auth1.save
+          
+          ExtraLdap.update_custom_user_data(@auth1.name)
+
+          assert_equal '/home/example1', @user.custom_value_for(@custom_field).value
+        end
+
+      end
+    end
+  end
 end

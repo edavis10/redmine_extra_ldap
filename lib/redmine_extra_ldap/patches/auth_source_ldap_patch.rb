@@ -46,6 +46,33 @@ module RedmineExtraLdap
           end
         end
 
+        # Connects to LDAP and returns the configured custom user
+        # attributes for the use with login
+        def get_custom_attributes_for_user(login)
+          ldap_con = initialize_ldap_con(self.account, self.account_password)
+          object_filter = Net::LDAP::Filter.eq( "objectClass", "*" )
+          login_filter = Net::LDAP::Filter.eq( self.attr_login, login ) 
+
+          attrs = []
+
+          custom_ldap_filter = custom_filter_to_ldap
+
+          if custom_ldap_filter.present?
+            search_filters = object_filter & login_filter & custom_ldap_filter
+          else
+            search_filters = object_filter & login_filter
+          end
+
+          ldap_con.search( :base => self.base_dn, 
+                           :filter => search_filters,
+                           :attributes=> ['dn',
+                                          custom_attributes.values]) do |entry|
+            attrs = get_user_attributes_from_ldap_entry(entry)
+          end
+
+          return attrs
+        end
+
         def user_exists?(user)
           # get user's DN
           ldap_con = initialize_ldap_con(self.account, self.account_password)

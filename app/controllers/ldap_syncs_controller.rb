@@ -5,6 +5,7 @@ class LdapSyncsController < ApplicationController
   def show
     ExtraLdap.add_new_users(:all)
     ExtraLdap.lock_or_unlock_accounts(:all)
+    ExtraLdap.update_custom_user_data(:all)
     
     flash[:notice] = l(:label_sync_completed)
     redirect_to :controller => 'auth_sources', :action => 'list'
