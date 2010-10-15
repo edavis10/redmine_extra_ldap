@@ -42,10 +42,8 @@ class ExtraLdap
     ldaps.each do |ldap|
       ldap.users.all.each do |user|
         attributes = ldap.get_custom_attributes_for_user(user.login)
-        if attributes.present? &&
-            attributes.first.present? &&
-            attributes.first[:custom_field_values].present?
-          user.custom_field_values = attributes.first[:custom_field_values]
+        if attributes.present? && attributes[:custom_field_values].present?
+          user.custom_field_values = attributes[:custom_field_values]
           user.save
         end
       end
