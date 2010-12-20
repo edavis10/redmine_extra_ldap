@@ -7,6 +7,9 @@ module RedmineExtraLdap
       end
 
       module ClassMethods
+        def supports_failover?
+          AuthSourceLdap.columns.collect(&:name).include?("failover_host")
+        end
       end
 
       module InstanceMethods
@@ -44,6 +47,13 @@ module RedmineExtraLdap
             end
 
           end
+        rescue Net::LDAP::LdapError => text
+          if self.class.supports_failover? && allow_failover? && !failover_triggered?
+            try_to_failover_and_log
+            retry
+          else
+            raise "LdapError: " + text
+          end
         end
 
         # Connects to LDAP and returns the configured custom user
@@ -71,6 +81,15 @@ module RedmineExtraLdap
           end
 
           return attrs
+
+        rescue Net::LDAP::LdapError => text
+          if self.class.supports_failover? && allow_failover? && !failover_triggered?
+            try_to_failover_and_log
+            retry
+          else
+            raise "LdapError: " + text
+          end
+
         end
 
         def user_exists?(user)
@@ -87,6 +106,13 @@ module RedmineExtraLdap
           
           return dn.present?
 
+        rescue Net::LDAP::LdapError => text
+          if self.class.supports_failover? && allow_failover? && !failover_triggered?
+            try_to_failover_and_log
+            retry
+          else
+            raise "LdapError: " + text
+          end
         end
 
         def find_user_by_email(mail)
@@ -118,6 +144,14 @@ module RedmineExtraLdap
           else
             return attrs
           end
+        rescue Net::LDAP::LdapError => text
+          if self.class.supports_failover? && allow_failover? && !failover_triggered?
+            try_to_failover_and_log
+            retry
+          else
+            raise "LdapError: " + text
+          end
+
         end
       end
     end
