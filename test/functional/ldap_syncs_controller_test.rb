@@ -25,7 +25,7 @@ class LdapSyncsControllerTest < ActionController::TestCase
       end
       
       should_respond_with :redirect
-      should_redirect_to("authentication source list") { {:controller => 'auth_sources', :action => 'list' }}
+      should_redirect_to("authentication source list") { {:controller => 'ldap_auth_sources', :action => 'index' }}
       should_set_the_flash_to /complete/i
     end
 
