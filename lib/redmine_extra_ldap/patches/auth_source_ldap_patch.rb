@@ -17,7 +17,18 @@ module RedmineExtraLdap
         # instead of copied
         def add_new_users(options={})
           ldap_con = initialize_ldap_con(self.account, self.account_password)
-          object_filter = Net::LDAP::Filter.eq( "objectClass", "*" ) 
+          object_filter = Net::LDAP::Filter.eq( "objectClass", "*" )
+          # Handle new code for custom LDAP filters
+          if respond_to?(:custom_filter)
+            custom_ldap_filter = custom_filter_to_ldap
+          end
+
+          if custom_ldap_filter.present?
+            search_filters = object_filter & custom_ldap_filter
+          else
+            search_filters = object_filter
+          end
+
           dn = String.new
           attrs = []
 
@@ -27,7 +38,7 @@ module RedmineExtraLdap
           end
 
           ldap_con.search( :base => self.base_dn, 
-                           :filter => object_filter,
+                           :filter => search_filters,
                            :attributes=> ['dn',
                                           self.attr_login,
                                           self.attr_firstname,

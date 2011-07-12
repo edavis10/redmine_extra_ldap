@@ -93,6 +93,22 @@ class ExtraLdapTest < ActiveSupport::TestCase
           end
         end
       end
+
+      context 'with a custom_filter' do
+        should 'only add users matching the custom_filter' do
+          @auth1.update_attributes(:custom_filter => "(& (homeDirectory=*) (sn=O*))")
+          @auth1.reload
+
+          assert_difference('User.count', 1) do
+            ExtraLdap.add_new_users(@auth1.name)
+          end
+
+          assert !User.try_to_login('edavis', '123456')
+          assert User.try_to_login('example1', '123456')
+
+        end
+      end
+      
     end
       
   end
