@@ -76,7 +76,10 @@ module RedmineExtraLdap
 
           attrs = []
 
-          custom_ldap_filter = custom_filter_to_ldap
+          # Handle new code for custom LDAP filters
+          if respond_to?(:custom_filter)
+            custom_ldap_filter = custom_filter_to_ldap
+          end
 
           if custom_ldap_filter.present?
             search_filters = object_filter & login_filter & custom_ldap_filter
@@ -108,9 +111,20 @@ module RedmineExtraLdap
           ldap_con = initialize_ldap_con(self.account, self.account_password)
           login_filter = Net::LDAP::Filter.eq( self.attr_login, user.login )
           object_filter = Net::LDAP::Filter.eq( "objectClass", "*" )
+          # Handle new code for custom LDAP filters
+          if respond_to?(:custom_filter)
+            custom_ldap_filter = custom_filter_to_ldap
+          end
+
+          if custom_ldap_filter.present?
+            search_filters = object_filter & login_filter & custom_ldap_filter
+          else
+            search_filters = object_filter & login_filter
+          end
+
           dn = String.new
           ldap_con.search( :base => self.base_dn, 
-                           :filter => object_filter & login_filter, 
+                           :filter => search_filters,
                            :attributes=> ['dn']) do |entry|
             dn = entry.dn
           end

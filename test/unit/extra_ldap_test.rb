@@ -160,6 +160,20 @@ class ExtraLdapTest < ActiveSupport::TestCase
         end
       end
 
+      context 'with a custom_filter on AuthSourceLdap' do
+        should 'make sure the custom_filter is used' do
+          @auth1.update_attributes(:custom_filter => "(& (homeDirectory=*) (sn=O*))")
+          @auth1.reload
+
+          ExtraLdap.lock_or_unlock_accounts(@auth1.id)
+
+          assert User.find_by_login('edavis').locked?, "user not found due to a custom_filter was not locked"
+          assert User.find_by_login('example1').active?, "user found with a custom_filter was locked"
+
+        end
+      end
+
+
       context 'with the "ALL" ldap connection name' do
         should 'connect to all of the LDAP connections to add new users' do
           @active_and_missing_user = User.generate_with_protected!(:auth_source => @auth1)
